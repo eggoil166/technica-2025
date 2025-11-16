@@ -167,10 +167,25 @@ def rewrite():
     supabase.table("api_keys").update({
         "usage_count": (key_row.get("usage_count") or 0) + 1
     }).eq("id", key_row["id"]).execute()
+    
+    flagged = True
     data = request.get_json()
     prompt = data["text"]
-    rewritten = rewrite_prompt(prompt)
-    return jsonify({"original": prompt, "rewritten": rewritten})
+    iterations = 0
+    while flagged and iterations < 5:
+        prompt = rewrite_prompt(prompt)
+        patterns = pattern_detector(prompt)
+        clf_label, clf_score = classification_detector(prompt)
+        llm_risk, llm_cats = llm_detector(prompt)
+        flagged = (patterns is not None) or (clf_label=='jailbreak') or (llm_risk>30)
+        iterations += 1
+    if flagged:
+        return jsonify({
+            "success": False,
+            "original": prompt,
+            "rewritten": None
+        })
+    return jsonify({"success": True, "original": prompt, "rewritten": prompt})
     
 @app.get("/")
 def home():
