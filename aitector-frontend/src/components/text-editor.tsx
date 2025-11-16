@@ -171,13 +171,13 @@ export function TextEditor({ onAnalyze }: TextEditorProps) {
 
   return (
     // ===== Main Container =====
-    // Dark themed card with border and padding
-    <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6 space-y-4">
+    // Glass-morphism themed card with blur and transparency
+    <div className="bg-white/5 backdrop-blur-xl rounded-xs p-6 space-y-4 shadow-2xl shadow-purple-500/10">
       
       {/* ===== Header Section ===== */}
       {/* Title and example dropdown selector */}
       <div className="flex justify-between items-center">
-        <h3 data-magnetic className="text-lg font-semibold text-white">Prompt Input</h3>
+        <h3 className="text-lg font-semibold text-white">Prompt Input</h3>
         
         {/* ===== Example Prompts Dropdown ===== */}
         {/* Allows users to quickly load pre-configured test prompts */}
@@ -185,9 +185,7 @@ export function TextEditor({ onAnalyze }: TextEditorProps) {
           <motion.button
             data-magnetic
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2.5 text-sm text-white hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            className="flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-xs px-4 py-2.5 text-sm text-white hover:bg-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
           >
             Load Example
             <motion.div
@@ -208,7 +206,7 @@ export function TextEditor({ onAnalyze }: TextEditorProps) {
                 animate="open"
                 exit="closed"
                 variants={dropdownVariants}
-                className="absolute right-0 mt-2 w-72 bg-neutral-800 border border-neutral-700 rounded-lg shadow-2xl overflow-hidden z-50"
+                className="absolute right-0 mt-2 w-72 bg-gray-800/20 backdrop-blur-2xl  rounded-xs shadow-2xl overflow-hidden z-50"
               >
                 <motion.ul variants={listVariants} className="py-1">
                   {EXAMPLE_PROMPTS.map((prompt, idx) => (
@@ -229,7 +227,7 @@ export function TextEditor({ onAnalyze }: TextEditorProps) {
                           loadExample(prompt);
                           setIsDropdownOpen(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-white transition-colors border-b border-neutral-700/50 last:border-b-0"
+                        className="w-full text-left px-4 py-3 text-sm text-white transition-colors"
                       >
                         <div className="font-semibold text-purple-400 mb-1">
                           Example {idx + 1}
@@ -257,14 +255,13 @@ export function TextEditor({ onAnalyze }: TextEditorProps) {
           value={text}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
           placeholder={placeholder}
-          className={`w-full min-h-[300px] bg-neutral-800 focus:bg-neutral-700 "
-          } rounded-lg p-4 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y font-mono text-sm transition-all duration-400`}
+          className={`w-full min-h-[300px] bg-white/5 backdrop-blur-sm focus:bg-white/10 rounded-xs p-4 text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y font-mono text-sm transition-all duration-400 border border-white/10`}
           disabled={isAnalyzing}
         />
         
         {/* ===== Character Counter ===== */}
         {/* Shows current character count and limit, with overflow warning */}
-        <div className="absolute bottom-2 right-2 text-xs text-neutral-500">
+        <div className="absolute bottom-2 right-2 text-xs text-neutral-400">
           {text.length} / 5000
           {isOverLimit && (
             <span className="text-red-400 ml-2">Character limit exceeded</span>

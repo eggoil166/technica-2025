@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useRequireAuth, useSupabaseUser } from "@/lib/useSupabaseAuth";
 import { supabase } from "@/lib/supabaseclient";
+import { ParticleBackground } from "@/components/particle-background";
+import { CursorCorners } from "@/components/cursor-corners";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ApiKeyRow = {
   id: string;
@@ -146,14 +151,26 @@ async function handleCreateKey(e?: React.FormEvent) {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-amber-900">
-        <p>Loading…</p>
-      </main>
+      <>
+        <ParticleBackground />
+        <CursorCorners />
+        <div className="relative flex flex-col min-h-screen" style={{ zIndex: 10 }}>
+          <Navbar />
+          <main className="flex-1 flex items-center justify-center bg-transparent text-white">
+            <p>Loading…</p>
+          </main>
+        </div>
+      </>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black text-amber-900 p-8 relative">
+    <>
+      <ParticleBackground />
+      <CursorCorners />
+      <div className="relative flex flex-col min-h-screen" style={{ zIndex: 10 }}>
+        <Navbar />
+        <main className="flex-1 bg-transparent text-white p-8">
       <style>
         {`
           @keyframes fadeInOut {
@@ -175,28 +192,31 @@ async function handleCreateKey(e?: React.FormEvent) {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <div>
-            <Button variant="outline" onClick={handleSignOut}>
+      <div className="max-w-6xl mx-auto pt-20">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xs p-6 shadow-2xl shadow-purple-500/10">
+          {/* Dashboard Header */}
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+            <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={handleSignOut}>
               Sign out
             </Button>
           </div>
-        </div>
 
-        <section className="bg-neutral-900 rounded-md p-6 mb-6">
-          <h2 className="text-lg font-medium">Welcome</h2>
-          <p className="mt-2 text-sm text-neutral-300">{user ? user.email : "—"}</p>
-        </section>
+          {/* Welcome Section */}
+          <div className="mb-8 pb-8 border-b border-white/10">
+            <h2 className="text-lg font-medium">Welcome</h2>
+            <p className="mt-2 text-sm text-neutral-300">{user ? user.email : "—"}</p>
+          </div>
 
-        <section className="bg-neutral-900 rounded-md p-6 mb-6">
-          <h2 className="text-lg font-medium">API Keys</h2>
-          <p className="mt-2 text-sm text-neutral-400">Create API keys for programmatic access. Keep them secret.</p>
+          {/* API Keys Section */}
+          <div>
+            <h2 className="text-lg font-medium">API Keys</h2>
+            <p className="mt-2 text-sm text-neutral-400">Create API keys for programmatic access. Keep them secret.</p>
 
           {newKeyValue && (
-            <div className="mt-4 p-4 border border-green-600 rounded bg-black/40 relative">
+            <div className="mt-4 p-4 border border-purple-800 rounded bg-black/40 backdrop-blur-sm relative transition-all">
               <button
+                data-magnetic
                 className="absolute top-2 right-2 text-neutral-400 hover:text-white text-lg"
                 aria-label="Close"
                 onClick={() => setNewKeyValue(null)}
@@ -205,19 +225,20 @@ async function handleCreateKey(e?: React.FormEvent) {
               </button>
               <p className="text-sm text-neutral-300">New API key (save this now — it will not be shown again):</p>
               <div className="mt-2 flex items-center gap-3">
-                <code className="break-all bg-neutral-800 px-3 py-2 rounded">{newKeyValue}</code>
-                <Button onClick={() => handleCopy(newKeyValue)}>Copy</Button>
+                <code className="break-all bg-neutral-800 backdrop-blur-sm px-3 py-2 rounded">{newKeyValue}</code>
+                <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={() => handleCopy(newKeyValue)}>Copy</Button>
               </div>
             </div>
           )}
 
-          <form className="mt-4 flex gap-3" onSubmit={handleCreateKey}>
-            <Button type="submit" variant="outline" disabled={creating}>
+          <form className="mt-4 flex gap-3 text-black" onSubmit={handleCreateKey}>
+            <Button data-magnetic type="submit" className="hover:bg-neutral-600 transition-colors duration-300" disabled={creating}>
               {creating ? "Creating…" : "Create API Key"}
             </Button>
             <Button
+              data-magnetic
               type="button"
-              variant="outline"
+              className="hover:bg-neutral-600 transition-colors duration-300"
               onClick={(e) => {
                 e.preventDefault();
                 fetchKeys();
@@ -229,13 +250,13 @@ async function handleCreateKey(e?: React.FormEvent) {
           </form>
 
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full table-auto text-left">
+            <table className="w-full table-fixed text-left">
               <thead>
                 <tr className="text-sm text-neutral-400 border-b border-neutral-800">
-                  <th className="py-2">Key ID</th>
-                  <th className="py-2">Created</th>
-                  <th className="py-2">Usage</th>
-                  <th className="py-2">Actions</th>
+                  <th className="py-2 w-[30%]">Key ID</th>
+                  <th className="py-2 w-[20%]">Created</th>
+                  <th className="py-2 w-[15%]">Usage</th>
+                  <th className="py-2 w-[35%]">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -254,16 +275,17 @@ async function handleCreateKey(e?: React.FormEvent) {
                     <td className="py-3 align-top text-neutral-400 text-sm">{formatDate(k.created_at)}</td>
                     <td className="py-3 align-top text-neutral-400 text-sm">{k.usage_count ?? 0}</td>
                     <td className="py-3 align-top">
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" onClick={() => handleCopy(k.id)}>
+                      <div className="flex items-center gap-2 text-black">
+                        <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" size="sm" onClick={() => handleCopy(k.id)}>
                           Copy ID
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => setStatsKey(k)}>
+                        <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" size="sm" onClick={() => setStatsKey(k)}>
                           Stats
                         </Button>
                         <Button
+                          data-magnetic
+                          className="hover:bg-red-600 transition-colors duration-300"
                           size="sm"
-                          variant="destructive"
                           onClick={() => setShowRevokeModal({ id: k.id })}
                         >
                           Revoke
@@ -275,33 +297,52 @@ async function handleCreateKey(e?: React.FormEvent) {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {statsKey && <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />}
+      {statsKey && <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />}
 
-        {showRevokeModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="w-full max-w-sm rounded bg-neutral-900 p-6">
-              <h3 className="text-lg font-medium mb-4">Revoke API Key?</h3>
-              <p className="text-sm text-neutral-300 mb-6">
-                This cannot be undone. Are you sure you want to revoke this API key?
-              </p>
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setShowRevokeModal(null)}>
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDeleteKey(showRevokeModal.id)}
-                >
-                  Revoke
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {showRevokeModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 0 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="w-full max-w-sm rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
+              >
+                <h3 data-magnetic className="text-lg font-medium mb-4">Revoke API Key?</h3>
+                <p className="text-sm text-neutral-300 mb-6">
+                  This cannot be undone. Are you sure you want to revoke this API key?
+                </p>
+                <div className="flex gap-3 justify-end">
+                  <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={() => setShowRevokeModal(null)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    data-magnetic
+                    variant="destructive"
+                    onClick={() => handleDeleteKey(showRevokeModal.id)}
+                  >
+                    Revoke
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </main>
+    <Footer />
+    </div>
+    </>
   );
 }
 
@@ -339,7 +380,9 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
           usage_count: body.usage_count ?? 0,
           last_used_at: body.last_used_at ?? null,
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error(e);
+      }
     }
     load();
     return () => {
@@ -348,11 +391,11 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
   }, [keyRow]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-lg rounded bg-neutral-900 p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl">
         <div className="flex items-start justify-between">
-          <h3 className="text-lg font-medium">API Key Stats</h3>
-          <Button variant="outline" onClick={onClose}>
+          <h3 data-magnetic className="text-lg font-medium">API Key Stats</h3>
+          <Button data-magnetic variant="outline" onClick={onClose}>
             Close
           </Button>
         </div>
@@ -365,12 +408,12 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="p-4 bg-black/40 rounded">
+          <div className="p-4 bg-black/40 backdrop-blur-sm rounded">
             <div className="text-xs text-neutral-400">Usage Count</div>
             <div className="text-xl font-semibold">{stats?.usage_count ?? "-"}</div>
           </div>
           {stats?.last_used_at && (
-            <div className="p-4 bg-black/40 rounded">
+            <div className="p-4 bg-black/40 backdrop-blur-sm rounded">
               <div className="text-xs text-neutral-400">Last Used</div>
               <div className="text-sm">{formatDate(stats.last_used_at)}</div>
             </div>

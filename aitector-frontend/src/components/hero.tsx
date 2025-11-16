@@ -5,13 +5,8 @@ import { motion } from "framer-motion";
 
 export function Hero() {
   return (
-    <section className="relative min-h-[750px] flex flex-col items-center justify-center overflow-hidden bg-black py-32">
-      {/* Aurora Background */}
-      <div className="absolute inset-0 w-full h-full">
-        <div className="aurora absolute inset-0" />
-        {/* Optional subtle overlay for depth */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
+    <section className="relative min-h-[750px] flex flex-col items-center justify-center overflow-hidden bg-transparent py-32">
+
 
       {/* Foreground */}
       <motion.div

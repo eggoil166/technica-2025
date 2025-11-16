@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseclient";
 import { useSupabaseUser } from "@/lib/useSupabaseAuth";
 import { Button } from "@/components/ui/button";
+import { ParticleBackground } from "@/components/particle-background";
 
 export default function AuthPage() {
   const router = useRouter();
@@ -53,9 +54,12 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-amber-900">
-      <div className="w-full max-w-md p-8">
-        <h1 className="text-2xl font-semibold mb-4">Sign in</h1>
+    <>
+      <ParticleBackground />
+      <main className="min-h-screen flex items-center justify-center bg-transparent text-white relative z-10">
+        {/* form container */}
+        <div className="w-full max-w-md p-8 rounded-xs bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl shadow-purple-500/10">
+        <h1 className="text-2xl text-white font-semibold mb-4">Sign in</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
@@ -65,7 +69,7 @@ export default function AuthPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-md bg-neutral-900 border border-neutral-800 px-3 py-2"
+              className="mt-1 w-full rounded-xs bg-neutral-900 border border-neutral-800 px-3 py-2"
             />
           </label>
 
@@ -73,8 +77,8 @@ export default function AuthPage() {
             <Button type="submit" disabled={sending} size="lg">
               {sending ? "Sending…" : "Send magic link"}
             </Button>
-            <Button
-              variant="outline"
+            <Button className="text-white"
+              
               onClick={() => router.push("/")}
               size="lg"
             >
@@ -91,7 +95,8 @@ export default function AuthPage() {
             signed in automatically.
           </p>
         </div>
-      </div>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }

@@ -1,2 +1,4 @@
 *.env
 *.env.local
+aitector-frontend/package.json
+aitector-frontend/package-lock.json
