@@ -16,11 +16,13 @@ export default function PlaygroundPage() {
     setResults(null);
 
     try {
+      const apiKey = "sk_8b9f680406e03fff4a74f66677d56c81ab8faca7b293235d49ed17fa589f20b9_mi17vk27";
 
       const response = await fetch("/detect", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "API-Key": apiKey,
         },
         body: JSON.stringify({ text }),
       });
