@@ -1,16 +1,11 @@
-app = "your-app-name"        # <-- change this to your Fly.io app name
-primary_region = "iad"       # <-- pick your closest region
-
-[build]
-  # If you are using a Dockerfile, keep this empty or delete [build] entirely.
-  # If you want Fly to auto-detect, leave it as-is.
+app = "your-app-name"
+primary_region = "iad"
 
 [env]
   PORT = "8080"
-  PYTHONUNBUFFERED = "1"
 
 [[services]]
-  internal_port = 8080       # Flask must bind to this port
+  internal_port = 8080
   protocol = "tcp"
 
   [[services.ports]]
@@ -20,14 +15,3 @@ primary_region = "iad"       # <-- pick your closest region
   [[services.ports]]
     port = 443
     handlers = ["tls", "http"]
-
-  [services.concurrency]
-    type = "requests"
-    soft_limit = 20
-    hard_limit = 40
-
-  [[services.tcp_checks]]
-    interval = "15s"
-    timeout  = "2s"
-    grace_period = "5s"
-    restart_limit = 0
