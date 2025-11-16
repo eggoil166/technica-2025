@@ -27,6 +27,9 @@ export function Navbar() {
           <a data-magnetic href="/playground" className="text-neutral-300 hover:text-white">
             Playground
           </a>
+          <a data-magnetic href="/pricing" className="text-neutral-300 hover:text-white">
+            Pricing
+          </a>
 
           {/* Dashboard redirects to /dashboard when logged in, otherwise to /auth */}
           <DashboardButton />

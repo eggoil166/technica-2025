@@ -185,38 +185,46 @@ Authorization: Bearer YOUR_API_KEY
                       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xs p-6 shadow-2xl shadow-purple-500/10">
                         <h2  className="text-3xl font-bold mb-4">Response Format</h2>
                         <p className="text-neutral-300 mb-4">
-                          The API returns a JSON response with detection results:
+                          The API returns a JSON response with detection results from all three layers:
                         </p>
                         <pre data-magnetic className="bg-black/50 backdrop-blur-sm border border-white/10 text-green-400 p-4 rounded-xs overflow-x-auto text-sm mb-4">
 {`{
-  "risk": 92,
-  "is_jailbreak": true,
-  "categories": ["system_override", "role_break"],
-  "confidence": 0.95
+  "classifier": {
+    "label": "benign",
+    "score": 0.9922645092010498
+  },
+  "flagged": true,
+  "llm": {
+    "cats": [],
+    "risk": 0
+  },
+  "patterns": [
+    "encoding_trick"
+  ]
 }`}
                         </pre>
                         <div className="mt-4">
                           <h3 className="text-lg font-semibold mb-2">Response Fields</h3>
                           <div className="space-y-3">
                             <div className="border-l-2 border-purple-500 pl-4">
-                              <code className="text-purple-300">risk</code>
-                              <span className="text-neutral-400 ml-2">integer (0-100)</span>
-                              <p className="text-neutral-300 text-sm mt-1">Overall risk score. Higher values indicate higher likelihood of jailbreak attempt.</p>
-                            </div>
-                            <div className="border-l-2 border-purple-500 pl-4">
-                              <code className="text-purple-300">is_jailbreak</code>
+                              <code className="text-purple-300">flagged</code>
                               <span className="text-neutral-400 ml-2">boolean</span>
-                              <p className="text-neutral-300 text-sm mt-1">Whether the prompt is classified as a jailbreak attempt.</p>
+                              <p className="text-neutral-300 text-sm mt-1">Whether the prompt is flagged as a jailbreak attempt by any detection layer.</p>
                             </div>
                             <div className="border-l-2 border-purple-500 pl-4">
-                              <code className="text-purple-300">categories</code>
-                              <span className="text-neutral-400 ml-2">array</span>
-                              <p className="text-neutral-300 text-sm mt-1">List of detected attack categories (e.g., "system_override", "role_break", "encoding").</p>
+                              <code className="text-purple-300">patterns</code>
+                              <span className="text-neutral-400 ml-2">array of strings</span>
+                              <p className="text-neutral-300 text-sm mt-1">List of regex patterns detected (e.g., "encoding_trick", "role_override").</p>
                             </div>
                             <div className="border-l-2 border-purple-500 pl-4">
-                              <code className="text-purple-300">confidence</code>
-                              <span className="text-neutral-400 ml-2">float (0-1)</span>
-                              <p className="text-neutral-300 text-sm mt-1">Confidence level of the detection.</p>
+                              <code className="text-purple-300">classifier</code>
+                              <span className="text-neutral-400 ml-2">object</span>
+                              <p className="text-neutral-300 text-sm mt-1">ML classifier results with <code className="text-purple-300">label</code> ("benign" or "jailbreak") and <code className="text-purple-300">score</code> (confidence 0-1).</p>
+                            </div>
+                            <div className="border-l-2 border-purple-500 pl-4">
+                              <code className="text-purple-300">llm</code>
+                              <span className="text-neutral-400 ml-2">object</span>
+                              <p className="text-neutral-300 text-sm mt-1">LLM safety analysis with <code className="text-purple-300">risk</code> score (0-100) and <code className="text-purple-300">cats</code> (detected attack categories).</p>
                             </div>
                           </div>
                         </div>

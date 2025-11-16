@@ -100,7 +100,7 @@ export default function PlaygroundPage() {
               )}
 
               {results && (
-                <pre className="bg-black/50 backdrop-blur-sm  rounded-xs p-4 text-sm text-green-400 overflow-x-auto font-mono">
+                <pre data-magnetic className="bg-black/50 backdrop-blur-sm  rounded-xs p-4 text-sm text-green-400 overflow-x-auto font-mono">
                   {JSON.stringify(results, null, 2)}
                 </pre>
               )}
