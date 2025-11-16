@@ -121,23 +121,6 @@ async function handleCreateKey(e?: React.FormEvent) {
     }
   }
 
-  async function handleFetchAnalytics(keyId: string) {
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-      const res = await fetch(`/api/analytics/${keyId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body?.error || 'Analytics fetch failed');
-      console.log('Analytics for key', keyId, ':', body);
-      alert(JSON.stringify(body, null, 2));
-    } catch (err: any) {
-      console.error("Error fetching analytics", err.message ?? err);
-      alert(err?.message ?? "Error fetching analytics");
-    }
-  }
-
   async function handleDeleteKey(id: string) {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -299,14 +282,6 @@ async function handleCreateKey(e?: React.FormEvent) {
                         <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" size="sm" onClick={() => setStatsKey(k)}>
                           Stats
                         </Button>
-                        <Button 
-                          data-magnetic 
-                          className="hover:bg-neutral-600 transition-colors duration-300" 
-                          size="sm" 
-                          onClick={() => handleFetchAnalytics(k.id)}
-                        >
-                          Analytics
-                        </Button>
                         <Button
                           data-magnetic
                           className="hover:bg-red-600 transition-colors duration-300"
@@ -387,7 +362,21 @@ function formatDate(d?: string | null) {
 }
 
 function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => void }) {
-  const [stats, setStats] = useState<{ usage_count: number; last_used_at?: string | null } | null>(null);
+  const [stats, setStats] = useState<{
+    detect: {
+      total: number;
+      flagged: number;
+      latency: number;
+      risk: number;
+    };
+    replace: {
+      total: number;
+      success: number;
+      latency: number;
+      iterations: number;
+    };
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -395,18 +384,17 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
-        const res = await fetch(`/api/keys/${keyRow.id}/stats`, {
+        const res = await fetch(`/api/analytics/${keyRow.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const body = await res.json();
-        if (!res.ok) throw new Error(body?.error || "Stats fetch failed");
+        if (!res.ok) throw new Error(body?.error || "Analytics fetch failed");
         if (!mounted) return;
-        setStats({
-          usage_count: body.usage_count ?? 0,
-          last_used_at: body.last_used_at ?? null,
-        });
+        setStats(body);
       } catch (e) {
         console.error(e);
+      } finally {
+        if (mounted) setLoading(false);
       }
     }
     load();
@@ -416,39 +404,99 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
   }, [keyRow]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl">
-        <div className="flex items-start justify-between">
-          <h3 data-magnetic className="text-lg font-medium">API Key Stats</h3>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 0 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="w-full max-w-2xl rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
+      >
+        <div className="flex items-start justify-between mb-4">
+          <h3 data-magnetic className="text-lg font-medium">API Key Analytics</h3>
           <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={onClose}>
             Close
           </Button>
         </div>
 
-        <div className="mt-4">
-          <p className="mt-2 text-sm text-neutral-300">ID: {keyRow.id}</p>
+        <div className="mb-6 pb-4 border-b border-white/10">
+          <p className="text-sm text-neutral-300">
+            Key ID: <code className="text-xs bg-black/40 px-2 py-1 rounded">{keyRow.id}</code>
+          </p>
           <p className="mt-2 text-sm text-neutral-300">
-            {`Created: ${formatDate(keyRow.created_at)}`}
+            Created: {formatDate(keyRow.created_at)}
           </p>
         </div>
 
-        <div className="mt-4 grid grid-cols-2 gap-4">
-          <div className="p-4 bg-black/40 backdrop-blur-sm rounded">
-            <div className="text-xs text-neutral-400">Usage Count</div>
-            <div className="text-xl font-semibold">{stats?.usage_count ?? "-"}</div>
+        {loading ? (
+          <div className="py-12 text-center text-neutral-400">
+            <p>Loading analytics...</p>
           </div>
-          {stats?.last_used_at && (
-            <div className="p-4 bg-black/40 backdrop-blur-sm rounded">
-              <div className="text-xs text-neutral-400">Last Used</div>
-              <div className="text-sm">{formatDate(stats.last_used_at)}</div>
+        ) : stats ? (
+          <div className="space-y-6">
+            {/* Detection Stats */}
+            <div>
+              <h4 className="text-sm font-semibold text-purple-400 mb-3 uppercase tracking-wider">
+                Detection Endpoint
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Total Requests</div>
+                  <div className="text-2xl font-semibold text-white">{stats.detect.total}</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Flagged</div>
+                  <div className="text-2xl font-semibold text-red-400">{stats.detect.flagged}</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Avg Latency</div>
+                  <div className="text-xl font-semibold text-white">{stats.detect.latency.toFixed(0)}ms</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Avg Risk Score</div>
+                  <div className="text-xl font-semibold text-orange-400">{stats.detect.risk.toFixed(1)}</div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
 
-        <div className="mt-6 text-sm text-neutral-400">
-          <p>This is a scaffolded stats view. Replace with real analytics as needed.</p>
-        </div>
-      </div>
-    </div>
+            {/* Rewrite Stats */}
+            <div>
+              <h4 className="text-sm font-semibold text-purple-400 mb-3 uppercase tracking-wider">
+                Rewrite Endpoint
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Total Requests</div>
+                  <div className="text-2xl font-semibold text-white">{stats.replace.total}</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Successful</div>
+                  <div className="text-2xl font-semibold text-green-400">{stats.replace.success}</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Avg Latency</div>
+                  <div className="text-xl font-semibold text-white">{stats.replace.latency.toFixed(0)}ms</div>
+                </div>
+                <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
+                  <div className="text-xs text-neutral-400 mb-1">Avg Iterations</div>
+                  <div className="text-xl font-semibold text-blue-400">{stats.replace.iterations.toFixed(1)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="py-12 text-center text-neutral-400">
+            <p>No analytics data available yet.</p>
+            <p className="text-sm mt-2">Start making API requests to see analytics.</p>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 }

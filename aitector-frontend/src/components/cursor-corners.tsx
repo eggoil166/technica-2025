@@ -47,7 +47,7 @@ export function CursorCorners() {
           foundHover = true;
           
           // Snap to element corners with padding/offset
-          const padding = 10; // Distance from edge (increase for more space)
+          const padding = 5; // Distance from edge (increase for more space)
           topLeftX.set(rect.left - padding);
           topLeftY.set(rect.top - padding);
           topRightX.set(rect.right + padding);
