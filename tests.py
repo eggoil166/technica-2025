@@ -9,6 +9,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 from flask_cors import CORS
 import hashlib
+import time
 
 load_dotenv()
 
@@ -132,6 +133,7 @@ CORS(app)
 
 @app.route("/detect", methods=["POST"])
 def detect():
+    start_time = time.perf_counter()
     user_id, key_row = authenticate_api_key(request)
     if not user_id:
         return jsonify({"error": "Invalid or missing API key"}), 401
@@ -145,6 +147,20 @@ def detect():
     clf_label, clf_score = classification_detector(prompt)
     llm_risk, llm_cats = llm_detector(prompt)
     flagged = (patterns is not None) or (clf_label=='jailbreak') or (llm_risk>30)
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    action = "detect"
+    response = supabase.table("api_usage").insert({
+        "api_key_id": key_row['id'],
+        'prompt': prompt,
+        'flagged': flagged,
+        'success': None,
+        'replacement': None,
+        'iterations': None,
+        'elapsed_time': elapsed_time,
+        'risk': llm_risk,
+        'action': action
+    }).execute()
     return jsonify({
         "patterns": patterns,
         "classifier": {
@@ -160,6 +176,7 @@ def detect():
     
 @app.route("/rewrite", methods=["POST"])
 def rewrite():
+    start_time = time.perf_counter()
     user_id, key_row = authenticate_api_key(request)
     if not user_id:
         return jsonify({"error": "Invalid or missing API key"}), 401
@@ -171,6 +188,7 @@ def rewrite():
     flagged = True
     data = request.get_json()
     prompt = data["text"]
+    promptcopy = data["text"]
     iterations = 0
     while flagged and iterations < 5:
         prompt = rewrite_prompt(prompt)
@@ -179,12 +197,38 @@ def rewrite():
         llm_risk, llm_cats = llm_detector(prompt)
         flagged = (patterns is not None) or (clf_label=='jailbreak') or (llm_risk>30)
         iterations += 1
+    end_time = time.perf_counter()
+    elapsed_time = end_time - start_time
+    action = "rewrite"
     if flagged:
+        response = supabase.table("api_usage").insert({
+            "api_key_id": key_row['id'],
+            'prompt': promptcopy,
+            'flagged': None,
+            'success': False,
+            'replacement': None,
+            'iterations': iterations,
+            'elapsed_time': elapsed_time,
+            'risk': None,
+            'action': action
+        }).execute()
         return jsonify({
             "success": False,
             "original": prompt,
             "rewritten": None
         })
+    response = supabase.table("api_usage").insert({
+        "api_key_id": key_row['id'],
+        'prompt': promptcopy,
+        'flagged': None,
+        'success': True,
+        'replacement': prompt,
+        'iterations': iterations,
+        'elapsed_time': elapsed_time,
+        'risk': None,
+        'action': action
+    }).execute()
+    print("sent to db", response)
     return jsonify({"success": True, "original": prompt, "rewritten": prompt})
     
 @app.get("/")
