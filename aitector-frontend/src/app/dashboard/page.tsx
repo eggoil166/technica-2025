@@ -419,7 +419,7 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
         className="w-full max-w-2xl rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
       >
         <div className="flex items-start justify-between mb-4">
-          <h3 data-magnetic className="text-lg font-medium">API Key Analytics</h3>
+          <h3 className="text-lg font-medium">API Key Analytics</h3>
           <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={onClose}>
             Close
           </Button>
@@ -456,7 +456,7 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
                 </div>
                 <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
                   <div className="text-xs text-neutral-400 mb-1">Avg Latency</div>
-                  <div className="text-xl font-semibold text-white">{stats.detect.latency.toFixed(0)}ms</div>
+                  <div className="text-xl font-semibold text-white">{stats.detect.latency.toFixed(0)}s</div>
                 </div>
                 <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
                   <div className="text-xs text-neutral-400 mb-1">Avg Risk Score</div>
@@ -481,7 +481,7 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
                 </div>
                 <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
                   <div className="text-xs text-neutral-400 mb-1">Avg Latency</div>
-                  <div className="text-xl font-semibold text-white">{stats.replace.latency.toFixed(0)}ms</div>
+                  <div className="text-xl font-semibold text-white">{stats.replace.latency.toFixed(0)}s</div>
                 </div>
                 <div className="p-4 bg-black/40 backdrop-blur-sm rounded-xs border border-white/5">
                   <div className="text-xs text-neutral-400 mb-1">Avg Iterations</div>
