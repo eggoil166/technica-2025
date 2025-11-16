@@ -18,8 +18,6 @@ key = os.environ.get("SUPABASE_KEY")
 print(url, key)
 supabase = create_client(url, key)
 
-load_dotenv()
-
 PATTERN_RULES = [
     (r"ignore (all )?previous instructions", "system_override"),
     (r"disregard (the )?(system|above)", "system_override"),
