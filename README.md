@@ -585,51 +585,50 @@ technica-2025/
 │   └── dashboard.png             # Dashboard screenshot
 │
 ├── aitector-frontend/            # Next.js frontend
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── page.tsx          # Landing page
-│   │   │   ├── layout.tsx        # Root layout with favicon
-│   │   │   ├── globals.css       # Global styles
-│   │   │   ├── auth/
-│   │   │   │   └── page.tsx      # Authentication page
-│   │   │   ├── dashboard/
-│   │   │   │   └── page.tsx      # Dashboard with API keys
-│   │   │   ├── playground/
-│   │   │   │   └── page.tsx      # Interactive testing
-│   │   │   ├── docs/
-│   │   │   │   └── page.tsx      # API documentation
-│   │   │   ├── pricing/
-│   │   │   │   └── page.tsx      # Pricing tiers
-│   │   │   └── api/
-│   │   │       ├── keys/         # API key CRUD endpoints
-│   │   │       ├── analytics/    # Analytics endpoint
-│   │   │       └── auth/         # Supabase auth callback
-│   │   │
-│   │   ├── components/
-│   │   │   ├── navbar.tsx        # Navigation bar
-│   │   │   ├── footer.tsx        # Footer component
-│   │   │   ├── hero.tsx          # Hero section
-│   │   │   ├── feature-card.tsx  # Feature cards
-│   │   │   ├── cursor-corners.tsx# Magnetic cursor
-│   │   │   └── ui/
-│   │   │       ├── button.tsx    # Button component
-│   │   │       └── card.tsx      # Card component
-│   │   │
-│   │   └── lib/
-│   │       ├── supabaseclient.ts # Supabase client setup
-│   │       ├── useSupabaseAuth.tsx # Auth hooks
-│   │       └── utils.ts          # Utility functions
-│   │
-│   ├── public/
-│   │   ├── small.png             # Favicon
-│   │   └── full.png              # Logo
-│   │
-│   ├── package.json              # Dependencies
-│   ├── tsconfig.json             # TypeScript config
-│   ├── tailwind.config.ts        # Tailwind config
-│   └── next.config.ts            # Next.js config
-│
-└── technica/                     # Python virtual environment
+    ├── src/
+    │   ├── app/
+    │   │   ├── page.tsx          # Landing page
+    │   │   ├── layout.tsx        # Root layout with favicon
+    │   │   ├── globals.css       # Global styles
+    │   │   ├── auth/
+    │   │   │   └── page.tsx      # Authentication page
+    │   │   ├── dashboard/
+    │   │   │   └── page.tsx      # Dashboard with API keys
+    │   │   ├── playground/
+    │   │   │   └── page.tsx      # Interactive testing
+    │   │   ├── docs/
+    │   │   │   └── page.tsx      # API documentation
+    │   │   ├── pricing/
+    │   │   │   └── page.tsx      # Pricing tiers
+    │   │   └── api/
+    │   │       ├── keys/         # API key CRUD endpoints
+    │   │       ├── analytics/    # Analytics endpoint
+    │   │       └── auth/         # Supabase auth callback
+    │   │
+    │   ├── components/
+    │   │   ├── navbar.tsx        # Navigation bar
+    │   │   ├── footer.tsx        # Footer component
+    │   │   ├── hero.tsx          # Hero section
+    │   │   ├── feature-card.tsx  # Feature cards
+    │   │   ├── cursor-corners.tsx# Magnetic cursor
+    │   │   └── ui/
+    │   │       ├── button.tsx    # Button component
+    │   │       └── card.tsx      # Card component
+    │   │
+    │   └── lib/
+    │       ├── supabaseclient.ts # Supabase client setup
+    │       ├── useSupabaseAuth.tsx # Auth hooks
+    │       └── utils.ts          # Utility functions
+    │
+    ├── public/
+    │   ├── small.png             # Favicon
+    │   └── full.png              # Logo
+    │
+    ├── package.json              # Dependencies
+    ├── tsconfig.json             # TypeScript config
+    ├── tailwind.config.ts        # Tailwind config
+    └── next.config.ts            # Next.js config
+              # Python virtual environment
 ```
 
 ---
