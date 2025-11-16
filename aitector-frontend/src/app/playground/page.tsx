@@ -18,7 +18,7 @@ export default function PlaygroundPage() {
     setResults(null);
 
     try {
-      const apiKey = process.env.API_KEY;
+      const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
       const response = await fetch("http://localhost:5000/detect", {
         method: "POST",

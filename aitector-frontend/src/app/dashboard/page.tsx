@@ -300,7 +300,9 @@ async function handleCreateKey(e?: React.FormEvent) {
         </div>
       </div>
 
-      {statsKey && <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />}
+      <AnimatePresence>
+        {statsKey && <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />}
+      </AnimatePresence>
 
         <AnimatePresence>
           {showRevokeModal && (
@@ -391,8 +393,20 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
   }, [keyRow]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 0 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 0 }}
+        transition={{ duration: 0.2, ease: "easeOut" }}
+        className="w-full max-w-lg rounded-xs bg-white/10 backdrop-blur-xl border border-white/10 p-6 shadow-2xl"
+      >
         <div className="flex items-start justify-between">
           <h3 data-magnetic className="text-lg font-medium">API Key Stats</h3>
           <Button data-magnetic className="hover:bg-neutral-600 transition-colors duration-300" onClick={onClose}>
@@ -423,7 +437,7 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
         <div className="mt-6 text-sm text-neutral-400">
           <p>This is a scaffolded stats view. Replace with real analytics as needed.</p>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
