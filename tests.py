@@ -212,7 +212,7 @@ def rewrite():
         }).execute()
         return jsonify({
             "success": False,
-            "original": prompt,
+            "original": promptcopy,
             "rewritten": None
         })
     response = supabase.table("api_usage").insert({
@@ -227,7 +227,7 @@ def rewrite():
         'action': action
     }).execute()
     print("sent to db", response)
-    return jsonify({"success": True, "original": prompt, "rewritten": prompt})
+    return jsonify({"success": True, "original": promptcopy, "rewritten": prompt})
     
 @app.get("/")
 def home():
