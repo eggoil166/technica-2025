@@ -25,12 +25,10 @@ export default function DashboardPage() {
   const [statsKey, setStatsKey] = useState<ApiKeyRow | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // NEW: copied toast state
   const [showCopiedToast, setShowCopiedToast] = useState(false);
 
   useEffect(() => {
     if (!loading && user) fetchKeys();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading]);
 
   async function handleSignOut() {
@@ -38,12 +36,23 @@ export default function DashboardPage() {
     router.push("/");
   }
 
+  /** Generate 32-byte random key (64 hex chars) */
   function generateKeyHex() {
     const arr = new Uint8Array(32);
     crypto.getRandomValues(arr);
     return Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join("");
   }
 
+  /** SHA-256 hash -> hex string */
+  async function hashKeySHA256(raw: string): Promise<string> {
+    const enc = new TextEncoder().encode(raw);
+    const hash = await crypto.subtle.digest("SHA-256", enc);
+    return Array.from(new Uint8Array(hash))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  /** Create key → hash → send hash to backend → display raw key once */
   async function handleCreateKey(e?: React.FormEvent) {
     e?.preventDefault();
     if (!user) return;
@@ -51,16 +60,32 @@ export default function DashboardPage() {
     setNewKeyValue(null);
 
     try {
+      // 1. Generate the raw API key
+      const rawKey = generateKeyHex();
+
+      // 2. Hash it
+      const hashedKey = await hashKeySHA256(rawKey);
+
+      // 3. Send only the hashed key to backend
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
       const res = await fetch('/api/keys', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({}),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          hashed_key: hashedKey
+        }),
       });
+
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || 'Create failed');
-      setNewKeyValue(body.key);
+
+      // 4. Show raw key ONCE to user
+      setNewKeyValue(rawKey);
+
       await fetchKeys();
     } catch (err: any) {
       console.error("Error creating API key", err.message ?? err);
@@ -76,7 +101,9 @@ export default function DashboardPage() {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
-      const res = await fetch('/api/keys', { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch('/api/keys', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || 'Fetch failed');
       setKeys(body.data || []);
@@ -91,7 +118,10 @@ export default function DashboardPage() {
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData?.session?.access_token;
-      const res = await fetch(`/api/keys/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch(`/api/keys/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const body = await res.json();
       if (!res.ok) throw new Error(body?.error || 'Delete failed');
       setNewKeyValue(null);
@@ -102,7 +132,6 @@ export default function DashboardPage() {
     setShowRevokeModal(null);
   }
 
-  // UPDATED: copy + toast
   async function handleCopy(text: string) {
     try {
       await navigator.clipboard.writeText(text);
@@ -123,8 +152,6 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-black text-amber-900 p-8 relative">
-
-      {/* Inline Fade Animation */}
       <style>
         {`
           @keyframes fadeInOut {
@@ -186,7 +213,15 @@ export default function DashboardPage() {
             <Button type="submit" variant="outline" disabled={creating}>
               {creating ? "Creating…" : "Create API Key"}
             </Button>
-            <Button type="button" variant="outline" onClick={(e) => { e.preventDefault(); fetchKeys(); }} disabled={refreshing}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={(e) => {
+                e.preventDefault();
+                fetchKeys();
+              }}
+              disabled={refreshing}
+            >
               {refreshing ? "Refreshing…" : "Refresh"}
             </Button>
           </form>
@@ -224,7 +259,11 @@ export default function DashboardPage() {
                         <Button size="sm" variant="outline" onClick={() => setStatsKey(k)}>
                           Stats
                         </Button>
-                        <Button size="sm" variant="destructive" onClick={() => setShowRevokeModal({ id: k.id })}>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => setShowRevokeModal({ id: k.id })}
+                        >
                           Revoke
                         </Button>
                       </div>
@@ -236,18 +275,25 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {statsKey && (
-          <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />
-        )}
+        {statsKey && <StatsModal keyRow={statsKey} onClose={() => setStatsKey(null)} />}
 
         {showRevokeModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="w-full max-w-sm rounded bg-neutral-900 p-6">
               <h3 className="text-lg font-medium mb-4">Revoke API Key?</h3>
-              <p className="text-sm text-neutral-300 mb-6">This cannot be undone. Are you sure you want to revoke this API key?</p>
+              <p className="text-sm text-neutral-300 mb-6">
+                This cannot be undone. Are you sure you want to revoke this API key?
+              </p>
               <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setShowRevokeModal(null)}>Cancel</Button>
-                <Button variant="destructive" onClick={() => handleDeleteKey(showRevokeModal.id)}>Revoke</Button>
+                <Button variant="outline" onClick={() => setShowRevokeModal(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDeleteKey(showRevokeModal.id)}
+                >
+                  Revoke
+                </Button>
               </div>
             </div>
           </div>
@@ -281,11 +327,16 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
       try {
         const { data: sessionData } = await supabase.auth.getSession();
         const token = sessionData?.session?.access_token;
-        const res = await fetch(`/api/keys/${keyRow.id}/stats`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`/api/keys/${keyRow.id}/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const body = await res.json();
-        if (!res.ok) throw new Error(body?.error || 'Stats fetch failed');
+        if (!res.ok) throw new Error(body?.error || "Stats fetch failed");
         if (!mounted) return;
-        setStats({ usage_count: body.usage_count ?? 0, last_used_at: body.last_used_at ?? null });
+        setStats({
+          usage_count: body.usage_count ?? 0,
+          last_used_at: body.last_used_at ?? null,
+        });
       } catch (e) {}
     }
     load();
@@ -306,9 +357,9 @@ function StatsModal({ keyRow, onClose }: { keyRow: ApiKeyRow; onClose: () => voi
 
         <div className="mt-4">
           <p className="mt-2 text-sm text-neutral-300">ID: {keyRow.id}</p>
-          <p className="mt-2 text-sm text-neutral-300">{`Created: ${formatDate(
-            keyRow.created_at
-          )}`}</p>
+          <p className="mt-2 text-sm text-neutral-300">
+            {`Created: ${formatDate(keyRow.created_at)}`}
+          </p>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-4">
