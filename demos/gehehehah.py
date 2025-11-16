@@ -65,7 +65,7 @@ def check_aegis(prompt):
                 'Content-Type': 'application/json'
             },
             json={'text': prompt},  # Aegis expects 'text', not 'prompt'
-            timeout=5
+            timeout=30  # Increased timeout to 30 seconds for LLM processing
         )
         
         if response.status_code == 200:
