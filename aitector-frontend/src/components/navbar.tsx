@@ -16,7 +16,7 @@ export function Navbar() {
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <a href="/" data-magnetic className="flex items-center gap-3 text-xl font-semibold text-white">
-          <Image src="/full.png" alt="Aegis Logo" width={32} height={32} className="object-contain" />
+          <Image src="/full1.png" alt="Aegis Logo" width={48} height={48} className="object-contain" />
           Aegis
         </a>
 

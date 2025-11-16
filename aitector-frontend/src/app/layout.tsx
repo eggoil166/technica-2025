@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-black">
       <head>
-        <link rel="icon" href="/small.png" type="image/png" />
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
       </head>
       <body
         className={`${lexendDeca.variable} antialiased bg-black font-sans`}
