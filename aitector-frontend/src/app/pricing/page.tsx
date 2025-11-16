@@ -16,8 +16,8 @@ const PRICING_TIERS = [
     description: "Perfect for testing and small projects",
     features: [
       "100 API requests per day",
-      "Basic jailbreak detection",
-      "Regex pattern matching",
+      "All jailbreak detection",
+      "Complete analytics",
       "API documentation access",
     ],
     cta: "Get Started",
@@ -29,9 +29,8 @@ const PRICING_TIERS = [
     period: "per month",
     description: "For growing teams and production apps",
     features: [
-      "1,000 API requests per day",
-      "All detection layers (Regex + ML + LLM)",
-      "Advanced pattern recognition",
+      "10,000 API requests per day",
+      "Rewriting support",
       "Priority support",
       "Usage analytics dashboard",
       "Custom rate limits",
