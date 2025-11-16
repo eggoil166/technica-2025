@@ -19,7 +19,7 @@ export default function HomePage() {
 
         <div className="flex-1 flex items-center">
           {/* Two-column compact layout */}
-          <section className="relative z-10 mx-auto max-w-7xl px-6 py-12">
+          <section className="relative z-10 mx-auto max-w-7xl px-6 py-12 mt-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               
               {/* Left: Hero Content */}
